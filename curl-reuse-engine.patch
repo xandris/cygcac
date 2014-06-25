@@ -1,0 +1,21 @@
+--- curl-7.33.0/lib/easy.c~	2013-09-08 15:11:15.000000000 -0700
++++ curl-7.33.0/lib/easy.c	2013-11-18 09:43:16.624459700 -0800
+@@ -980,6 +980,18 @@
+                              data->state.resolver) != CURLE_OK)
+     goto fail;
+ 
++  /* If set, clone the handle to the engine being used. */
++#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
++  if (data->state.engine) {
++    /* state.engine existing means curl_ossl_set_engine was
++     * previously successful.  Because curl_ossl_set_engine worked,
++     * we can query the already-set engine for that handle and use
++     * that to increment a reference:
++     */
++     Curl_ssl_set_engine(outcurl, ENGINE_get_id(data->state.engine));
++  }
++#endif /* USE_SSLEAY */
++
+   Curl_convert_setup(outcurl);
+ 
+   outcurl->magic = CURLEASY_MAGIC_NUMBER;

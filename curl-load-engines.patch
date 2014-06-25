@@ -1,0 +1,14 @@
+--- curl-7.33.0/lib/ssluse.c~	2013-10-13 14:07:32.000000000 -0700
++++ curl-7.33.0/lib/ssluse.c	2013-11-18 09:40:51.582041700 -0800
+@@ -734,6 +734,11 @@
+   /* Lets get nice error messages */
+   SSL_load_error_strings();
+ 
++  /* Load config file */
++  OPENSSL_load_builtin_modules();
++  if (CONF_modules_load_file(getenv("OPENSSL_CONF"), NULL, 0) <= 0)
++    return 0;
++
+   /* Init the global ciphers and digests */
+   if(!SSLeay_add_ssl_algorithms())
+     return 0;

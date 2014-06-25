@@ -1,0 +1,110 @@
+diff --git a/Documentation/config.txt b/Documentation/config.txt
+index 5f4d793..c63054b 100644
+--- a/Documentation/config.txt
++++ b/Documentation/config.txt
+@@ -1468,16 +1468,29 @@ http.sslVerify::
+ 	over HTTPS. Can be overridden by the 'GIT_SSL_NO_VERIFY' environment
+ 	variable.
+ 
++http.sslEngine::
++	String specifying the SSL engine to be used by curl.  This can be used to
++	specify non-default or dynamically loaded engines.  Can be overridden by
++	the 'GIT_SSL_ENGINE' environment variable.
++
+ http.sslCert::
+ 	File containing the SSL certificate when fetching or pushing
+ 	over HTTPS. Can be overridden by the 'GIT_SSL_CERT' environment
+ 	variable.
+ 
++http.sslCertType::
++	Specifies the format of the certificate to curl as one of (PEM|DER|ENG).
++	Can be overridden by the 'GIT_SSL_CERTTYPE' environment variable.
++
+ http.sslKey::
+ 	File containing the SSL private key when fetching or pushing
+ 	over HTTPS. Can be overridden by the 'GIT_SSL_KEY' environment
+ 	variable.
+ 
++http.sslKeyType::
++	Specifies the format of the private key to curl as one of (PEM|DER|ENG).
++	Can be overridden by the 'GIT_SSL_KEYTYPE' environment variable.
++
+ http.sslCertPasswordProtected::
+ 	Enable Git's password prompt for the SSL certificate.  Otherwise
+ 	OpenSSL will prompt the user, possibly many times, if the
+diff --git a/http.c b/http.c
+index 70eaa26..779fd6f 100644
+--- a/http.c
++++ b/http.c
+@@ -51,6 +51,10 @@ struct credential http_auth = CREDENTIAL_INIT;
+ static int http_proactive_auth;
+ static const char *user_agent;
+ 
++static const char *ssl_keytype;
++static const char *ssl_certtype;
++static const char *ssl_engine;
++
+ #if LIBCURL_VERSION_NUM >= 0x071700
+ /* Use CURLOPT_KEYPASSWD as is */
+ #elif LIBCURL_VERSION_NUM >= 0x070903
+@@ -77,6 +81,7 @@ size_t fread_buffer(char *ptr, size_t eltsize, size_t nmemb, void *buffer_)
+ 	memcpy(ptr, buffer->buf.buf + buffer->posn, size);
+ 	buffer->posn += size;
+ 
++
+ 	return size;
+ }
+ 
+@@ -216,6 +221,17 @@ static int http_options(const char *var, const char *value, void *cb)
+ 	if (!strcmp("http.useragent", var))
+ 		return git_config_string(&user_agent, var, value);
+ 
++	/* Adding parsing for curl options relating to engines and */
++	/* key/cert types.  This is necessary if attempting to     */
++	/* specify an external engine (e.g. for smartcards.)       */
++
++	if (!strcmp("http.sslkeytype", var))
++		return git_config_string(&ssl_keytype, var, value);
++	if (!strcmp("http.sslcerttype", var))
++		return git_config_string(&ssl_certtype, var, value);
++	if (!strcmp("http.sslengine", var))
++		return git_config_string(&ssl_engine, var, value);
++
+ 	/* Fall back on the default ones */
+ 	return git_default_config(var, value, cb);
+ }
+@@ -368,6 +384,22 @@ static CURL *get_curl_handle(void)
+ 		curl_easy_setopt(result, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+ 	}
+ 
++	/* Adding setting of engine-related curl SSL options. */
++	if (ssl_engine != NULL) {
++		curl_easy_setopt(result, CURLOPT_SSLENGINE, ssl_engine);
++
++		/* Within the lifetime of a single git execution, setting
++		 * the default does nothing interesting.  When curl properly
++		 * duplicates handles, the engine choice will propagate.
++		 */
++		/* curl_easy_setopt(result, CURLOPT_SSLENGINE_DEFAULT, 1L); */
++	}
++
++	if (ssl_keytype != NULL)
++		curl_easy_setopt(result, CURLOPT_SSLKEYTYPE, ssl_keytype);
++	if (ssl_certtype != NULL)
++		curl_easy_setopt(result, CURLOPT_SSLCERTTYPE, ssl_certtype);
++
+ 	set_curl_keepalive(result);
+ 
+ 	return result;
+@@ -464,6 +496,11 @@ void http_init(struct remote *remote, const char *url, int proactive_auth)
+ 			ssl_cert_password_required = 1;
+ 	}
+ 
++	/* Added environment variables for expanded engine-related options. */
++	set_from_env(&ssl_keytype, "GIT_SSL_KEYTYPE");
++	set_from_env(&ssl_certtype, "GIT_SSL_CERTTYPE");
++	set_from_env(&ssl_engine, "GIT_SSL_ENGINE");
++
+ #ifndef NO_CURL_EASY_DUPHANDLE
+ 	curl_default = get_curl_handle();
+ #endif
