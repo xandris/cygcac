@@ -2,6 +2,7 @@ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 CURL_VERSION=7.33.0
 GIT_VERSION=1.9.1
 CORES=4
+LDFLAGS=-L/usr/local/lib
 
 all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local/lib/libopensc.la /usr/local/bin/curl /usr/local/bin/git
 
@@ -14,7 +15,7 @@ git/git.exe: | git/Makefile
 	cd git; make -j$(CORES)
 
 git/Makefile: | git/.patched git/configure
-	cd git; ./configure
+	cd git; ./configure LDFLAGS=$(LDFLAGS)
 
 git/configure: | git/.patched /usr/local/lib/libcurl.a
 	cd git; autoconf
