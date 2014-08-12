@@ -1,4 +1,4 @@
-# CYCGAC
+# CYGCAC
 
 A script to help use smartcards with git (and other tools) on Windows under Cygwin.
 
@@ -17,7 +17,7 @@ A script to help use smartcards with git (and other tools) on Windows under Cygw
 
 1. Go make a sandwich or something. It seriously takes a long time.
 
-1. Edit `/usr/ssh/openssl.cnf` and insert this _just after_ `oid_section ...`:
+1. Edit `/usr/ssl/openssl.cnf` and insert this _just after_ `oid_section ...`:
 
         openssl_conf    = default_conf
 
