@@ -4,12 +4,16 @@ GIT_VERSION=1.9.1
 CORES=4
 LDFLAGS=-L/usr/local/lib
 
-all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local/lib/libopensc.la /usr/local/bin/curl /usr/local/bin/git /etc/profile.d/cygcac.sh /usr/local/ssl/openssl.cnf
+all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local/lib/libopensc.la /usr/local/bin/curl /usr/local/bin/git /etc/profile.d/cygcac.sh /usr/local/ssl/openssl.cnf /etc/pki/ca-trust/source/anchors/dodroot.pem
 
 # Environment setup
 
-/usr/local/ssl:
+/etc/pki/ca-trust/source/anchors /usr/local/ssl:
 	mkdir $@
+
+/etc/pki/ca-trust/source/anchors/dodroot.pem:
+	curl http://dodpki.c3pki.chamb.disa.mil/rel3_dodroot_2048.p7b | openssl pkcs7 -inform DER -out $@ -print_certs
+	update-ca-trust
 
 /usr/local/ssl/openssl.cnf: openssl.cnf | /usr/local/ssl
 	cp openssl.cnf $@
