@@ -4,7 +4,18 @@ GIT_VERSION=1.9.1
 CORES=4
 LDFLAGS=-L/usr/local/lib
 
-all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local/lib/libopensc.la /usr/local/bin/curl /usr/local/bin/git
+all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local/lib/libopensc.la /usr/local/bin/curl /usr/local/bin/git /etc/profile.d/cygcac.sh /usr/local/ssl/openssl.cnf
+
+# Environment setup
+
+/usr/local/ssl:
+	mkdir $@
+
+/usr/local/ssl/openssl.cnf: openssl.cnf | /usr/local/ssl
+	cp openssl.cnf $@
+
+/etc/profile.d/cygcac.sh: profile.d/cygcac.sh
+	cp profile.d/cygcac.sh $@
 
 # git compile/install
 
