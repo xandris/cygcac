@@ -1,29 +1,49 @@
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig
 CURL_VERSION=7.33.0
 GIT_VERSION=1.9.1
 CORES=4
-LDFLAGS=-L/usr/local/lib
+LDFLAGS=-L$(PREFIX)/lib -s
+CFLAGS=-O2 -march=native
+PREFIX=/usr/local
 
-all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local/lib/libopensc.la /usr/local/bin/curl /usr/local/bin/git /etc/profile.d/cygcac.sh /usr/local/ssl/openssl.cnf /etc/pki/ca-trust/source/anchors/dodroot.pem
+TARGETS+=$(PREFIX)/lib/libp11.la
+TARGETS+=$(PREFIX)/lib/engines/engine_pkcs11.la
+TARGETS+=$(PREFIX)/lib/libopensc.la
+TARGETS+=$(PREFIX)/bin/curl
+TARGETS+=$(PREFIX)/bin/git
+TARGETS+=$(PREFIX)/libexec/git-core/git-credential-wincred.exe
+TARGETS+=$(PREFIX)/ssl/openssl.cnf
+TARGETS+=/etc/profile.d/cygcac.sh
+TARGETS+=/etc/pki/ca-trust/source/anchors/dodroot.pem
+
+all: $(TARGETS)
+
+
 
 # Environment setup
 
-/etc/pki/ca-trust/source/anchors /usr/local/ssl:
+/etc/pki/ca-trust/source/anchors $(PREFIX)/ssl:
 	mkdir $@
 
 /etc/pki/ca-trust/source/anchors/dodroot.pem: | /etc/pki/ca-trust/source/anchors 
 	curl http://dodpki.c3pki.chamb.disa.mil/rel3_dodroot_2048.p7b | openssl pkcs7 -inform DER -out $@ -print_certs
 	update-ca-trust
 
-/usr/local/ssl/openssl.cnf: openssl.cnf | /usr/local/ssl
+$(PREFIX)/ssl/openssl.cnf: openssl.cnf | $(PREFIX)/ssl
 	cp openssl.cnf $@
 
 /etc/profile.d/cygcac.sh: profile.d/cygcac.sh
 	cp profile.d/cygcac.sh $@
 
+
+
 # git compile/install
 
-/usr/local/bin/git: git/git.exe
+$(PREFIX)/libexec/git-core/git-credential-wincred.exe: | git/Makefile
+	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno' install
+
+
+$(PREFIX)/bin/git: git/git.exe
 	cd git; make install
 
 git/git.exe: | git/Makefile
@@ -32,7 +52,7 @@ git/git.exe: | git/Makefile
 git/Makefile: | git/.patched git/configure
 	cd git; ./configure LDFLAGS=$(LDFLAGS)
 
-git/configure: | git/.patched /usr/local/lib/libcurl.a
+git/configure: | git/.patched $(PREFIX)/lib/libcurl.a
 	cd git; autoconf
 
 git/.patched: | git git-ssl-engines.patch
@@ -42,9 +62,12 @@ git/.patched: | git git-ssl-engines.patch
 git:
 	git clone --branch v$(GIT_VERSION) --depth 1 https://github.com/git/git.git git
 
+
+
+
 # libp11 compile/install
 
-/usr/local/lib/libp11.la: libp11/build/Makefile
+$(PREFIX)/lib/libp11.la: libp11/build/Makefile
 	cd libp11/build; make -j$(CORES) && make install
 
 libp11/build/Makefile: | libp11/build libp11/configure libp11/config.sub
@@ -62,7 +85,7 @@ libp11:
 
 # engine_pkcs11 compile/install
 
-/usr/local/lib/engines/engine_pkcs11.la: engine_pkcs11/Makefile
+$(PREFIX)/lib/engines/engine_pkcs11.la: engine_pkcs11/Makefile
 	cd engine_pkcs11; make -j$(CORES) && make install
 
 engine_pkcs11/Makefile: | engine_pkcs11/configure engine_pkcs11/config.sub
@@ -77,7 +100,7 @@ engine_pkcs11:
 
 # OpenSC compile/install
 
-/usr/local/lib/libopensc.la: opensc/build/Makefile
+$(PREFIX)/lib/libopensc.la: opensc/build/Makefile
 	cd opensc/build; make -j$(CORES) && make install
 
 opensc/build/Makefile: | opensc/configure opensc/config.sub opensc/build
@@ -95,7 +118,7 @@ opensc:
 
 # Curl compile/install
 
-/usr/local/bin/curl /usr/local/lib/libcurl.a: curl-$(CURL_VERSION)/build/Makefile
+$(PREFIX)/bin/curl $(PREFIX)/lib/libcurl.a: curl-$(CURL_VERSION)/build/Makefile
 	cd curl-$(CURL_VERSION)/build; make -j$(CORES) && make install
 
 curl-$(CURL_VERSION)/build/Makefile: | curl-$(CURL_VERSION)/build
