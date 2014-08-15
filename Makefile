@@ -13,8 +13,14 @@ TARGETS+=$(PREFIX)/bin/curl
 TARGETS+=$(PREFIX)/bin/git
 TARGETS+=$(PREFIX)/libexec/git-core/git-credential-wincred.exe
 TARGETS+=$(PREFIX)/ssl/openssl.cnf
+TARGETS+=$(PREFIX)/libexec/git-core/completion/git-completion.bash
+TARGETS+=$(PREFIX)/libexec/git-core/completion/git-completion.tcsh
+TARGETS+=$(PREFIX)/libexec/git-core/completion/git-completion.zsh
+TARGETS+=$(PREFIX)/libexec/git-core/completion/git-prompt.sh
 TARGETS+=/etc/profile.d/cygcac.sh
 TARGETS+=/etc/pki/ca-trust/source/anchors/dodroot.pem
+
+
 
 all: $(TARGETS)
 
@@ -38,6 +44,12 @@ $(PREFIX)/ssl/openssl.cnf: openssl.cnf | $(PREFIX)/ssl
 
 
 # git compile/install
+
+$(PREFIX)/libexec/git-core/completion:
+	mkdir -p $@
+
+$(PREFIX)/libexec/git-core/completion/%: git/contrib/completion/% | $(PREFIX)/libexec/git-core/completion
+	cp $< $@
 
 $(PREFIX)/libexec/git-core/git-credential-wincred.exe: | git/Makefile
 	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno' install

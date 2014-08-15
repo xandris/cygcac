@@ -46,9 +46,34 @@ A script to help use smartcards with git (and other tools) on Windows under Cygw
 
   Note that you might want to add `sslVerify = false` if your server doesn't use a standard certificate.
 
-1. Optional: tell git to use Windows Credential Manager for credentials storage:
+### Extra stuff
+
+There are a couple of extra features supplied by cygcac that you might like to use:
+
+1. `wincred` helper. Tell git to use Windows Credential Manager for credentials storage:
 
         git config --global credential.helper wincred
+
+1. bash completion and prompt flair. Add this to `~/.bash_profile`:
+
+        . /usr/local/libexec/git-core/completion/git-prompt.sh
+        . /usr/local/libexec/git-core/completion/git-completion.bash
+
+        GIT_PS1_SHOWDIRTYSTATE=1 
+        GIT_PS1_SHOWSTASHSTATE=1
+        GIT_PS1_SHOWUNTRACKEDFILES=1
+        GIT_PS1_SHOWUPSTREAM=auto  
+        GIT_PS1_SHOWCOLORHINTS=1
+
+        PROMPT_COMMAND='__git_ps1 "\[\e]0;\w\a\]\n\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]" "\n\$ "'
+
+   If you've customized `PS1` already, change `PROMPT_COMMAND`. Decide where in your prompt git info should be placed and use this format:
+
+        PROMPT_COMMAND='__git_ps1 "<First half of PS1>" "<Second half of PS1>"'
+
+   If `git-prompt.sh` has anything to say about the current directory, it will insert a space, _then_ the git info, and _then_ `<Second half of PS1>`.
+
+   Note that the prompt can slow down bash a bit. If it annoys you, comment out some of the `SHOW` variables above that you can live without.
 
 ## Troubleshooting
 
