@@ -11,7 +11,7 @@ all: /usr/local/lib/libp11.la /usr/local/lib/engines/engine_pkcs11.la /usr/local
 /etc/pki/ca-trust/source/anchors /usr/local/ssl:
 	mkdir $@
 
-/etc/pki/ca-trust/source/anchors/dodroot.pem:
+/etc/pki/ca-trust/source/anchors/dodroot.pem: | /etc/pki/ca-trust/source/anchors 
 	curl http://dodpki.c3pki.chamb.disa.mil/rel3_dodroot_2048.p7b | openssl pkcs7 -inform DER -out $@ -print_certs
 	update-ca-trust
 
