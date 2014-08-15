@@ -46,6 +46,10 @@ A script to help use smartcards with git (and other tools) on Windows under Cygw
 
   Note that you might want to add `sslVerify = false` if your server doesn't use a standard certificate.
 
+1. Optional: tell git to use Windows Credential Manager for credentials storage:
+
+        git config --global credential.helper wincred
+
 ## Troubleshooting
 
 * `git` loads `curl`
