@@ -1,4 +1,4 @@
-curl-*
+curl
 engine_pkcs11
 git
 libp11
