@@ -1,6 +1,8 @@
---- curl-7.33.0/lib/easy.c~	2013-09-08 15:11:15.000000000 -0700
-+++ curl-7.33.0/lib/easy.c	2013-11-18 09:43:16.624459700 -0800
-@@ -980,6 +980,18 @@
+diff --git a/lib/easy.c b/lib/easy.c
+index 160712e..0a1dc61 100644
+--- a/lib/easy.c
++++ b/lib/easy.c
+@@ -939,6 +939,18 @@ CURL *curl_easy_duphandle(CURL *incurl)
                               data->state.resolver) != CURLE_OK)
      goto fail;
  

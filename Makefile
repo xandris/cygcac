@@ -1,6 +1,6 @@
 export PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig
-CURL_VERSION=7.33.0
-GIT_VERSION=1.9.1
+CURL_VERSION=7.37.1
+GIT_VERSION=2.1.0
 CORES=4
 LDFLAGS=-L$(PREFIX)/lib -s
 CFLAGS=-O2 -march=native
@@ -54,15 +54,14 @@ $(PREFIX)/libexec/git-core/completion/%: git/contrib/completion/% | $(PREFIX)/li
 $(PREFIX)/libexec/git-core/git-credential-wincred.exe: | git/Makefile
 	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno' install
 
-
 $(PREFIX)/bin/git: git/git.exe
 	cd git; make install
 
-git/git.exe: | git/Makefile
+git/git.exe: | git/config.mak.autogen
 	cd git; make -j$(CORES)
 
-git/Makefile: | git/.patched git/configure
-	cd git; ./configure LDFLAGS=$(LDFLAGS)
+git/config.mak.autogen: | git/.patched git/configure
+	cd git; ./configure LDFLAGS="$(LDFLAGS)"
 
 git/configure: | git/.patched $(PREFIX)/lib/libcurl.a
 	cd git; autoconf
@@ -130,22 +129,17 @@ opensc:
 
 # Curl compile/install
 
-$(PREFIX)/bin/curl $(PREFIX)/lib/libcurl.a: curl-$(CURL_VERSION)/build/Makefile
-	cd curl-$(CURL_VERSION)/build; make -j$(CORES) && make install
+$(PREFIX)/bin/curl $(PREFIX)/lib/libcurl.a: curl/build/Makefile
+	cd curl/build; make -j$(CORES) && make install
 
-curl-$(CURL_VERSION)/build/Makefile: | curl-$(CURL_VERSION)/build
-	cd curl-$(CURL_VERSION)/build; ../configure --with-ca-bundle=/usr/ssl/certs/ca-bundle.crt
+curl/build/Makefile: | curl/build curl/configure
+	cd curl/build; ../configure --with-ca-bundle=/usr/ssl/certs/ca-bundle.crt
 
-curl-$(CURL_VERSION)/build: | curl-$(CURL_VERSION)/.patched
-	-mkdir curl-$(CURL_VERSION)/build
+curl/build: | curl
+	-mkdir curl/build
 
-curl-$(CURL_VERSION)/.patched: | curl-$(CURL_VERSION) curl-load-engines.patch curl-reuse-engine.patch
-	cd curl-$(CURL_VERSION); patch -p1 < ../curl-load-engines.patch
-	cd curl-$(CURL_VERSION); patch -p1 < ../curl-reuse-engine.patch
-	touch curl-$(CURL_VERSION)/.patched
+curl/configure: | curl
+	cd curl; ./buildconf
 
-curl-$(CURL_VERSION): | curl-$(CURL_VERSION).tar.bz2
-	tar xjf curl-$(CURL_VERSION).tar.bz2
-
-curl-$(CURL_VERSION).tar.bz2:
-	curl -O http://curl.haxx.se/download/curl-$(CURL_VERSION).tar.bz2
+curl:
+	git clone --branch curl-$(subst .,_,$(CURL_VERSION)) --depth 1 https://github.com/bagder/curl.git

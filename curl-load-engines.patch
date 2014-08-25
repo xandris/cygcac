@@ -1,6 +1,8 @@
---- curl-7.33.0/lib/ssluse.c~	2013-10-13 14:07:32.000000000 -0700
-+++ curl-7.33.0/lib/ssluse.c	2013-11-18 09:40:51.582041700 -0800
-@@ -734,6 +734,11 @@
+diff --git a/lib/vtls/openssl.c b/lib/vtls/openssl.c
+index c489600..59168ca 100644
+--- a/lib/vtls/openssl.c
++++ b/lib/vtls/openssl.c
+@@ -736,6 +736,11 @@ int Curl_ossl_init(void)
    /* Lets get nice error messages */
    SSL_load_error_strings();
  
