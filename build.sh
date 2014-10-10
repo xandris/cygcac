@@ -3,6 +3,6 @@ if ! [ -x /usr/local/bin/apt-cyg ]; then
     chmod +x /usr/local/bin/apt-cyg
 fi
 
-apt-cyg install gcc-g++ make autoconf automake vim zip unzip git libtool patch pkg-config openssl openssl-devel curl libiconv-devel tcl
+apt-cyg install gcc-g++ make autoconf automake vim zip unzip git libtool patch pkg-config openssl openssl-devel curl libiconv-devel tcl gettext-devel libexpat1-devel
 
 make

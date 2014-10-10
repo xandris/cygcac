@@ -2,40 +2,30 @@
 
 A script to help use smartcards with git (and other tools) on Windows under Cygwin.
 
+This project:
+
+* Builds and installs custom versions of opensc, engine\_pkcs11, libp11, curl, and git
+
+* Sets up a new OpenSSL configuration file and adds a `OPENSSL_CONF` environment variable to point to it
+
+* Installs the DoD root certificates into Cygwin to make them accessible to OpenSSL, curl, etc.
+
 ## Installation
 
 1. [install cygwin](https://github.com/xandris/install-cygwin). You will need git to clone this repository (or download a ZIP or something).
 
 1. Clone this repository:
 
-        git clone https://github.com/xandris/install-cygwin.git
+        git clone https://github.com/xandris/cygcac.git
 
 1. Enter the new directory and run `build.sh`:
 
-        cd install-cygwin
+        cd cygcac
         ./build.sh
 
 1. Go make a sandwich or something. It seriously takes a long time.
 
-1. Edit `/usr/ssl/openssl.cnf` and insert this _just after_ `oid_section ...`:
-
-        openssl_conf    = default_conf
-
-        [default_conf]
-  
-        engines = engines_section
-
-        [engines_section]
-
-        dynamic = dynamic_engine
-       
-        [dynamic_engine]
-
-        SO_PATH=/usr/local/lib/engines/engine_pkcs11.so
-        LIST_ADD=2
-        LOAD=EMPTY
-        MODULE_PATH=/usr/local/lib/pkcs11/opensc-pkcs11.so
-        init=1
+1. Restart your shell to pick up the new environment.
 
 1. Edit `~/.gitconfig` and add this section, substituting `$PROTECTED-WEBSITE` with the base URL of a smartcard-protected website of your choosing:
 

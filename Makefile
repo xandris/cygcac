@@ -9,6 +9,7 @@ PREFIX=/usr/local
 TARGETS+=$(PREFIX)/lib/libp11.la
 TARGETS+=$(PREFIX)/lib/engines/engine_pkcs11.la
 TARGETS+=$(PREFIX)/lib/libopensc.la
+TARGETS+=$(PREFIX)/lib/libcurl.a
 TARGETS+=$(PREFIX)/bin/curl
 TARGETS+=$(PREFIX)/bin/git
 TARGETS+=$(PREFIX)/libexec/git-core/git-credential-wincred.exe
@@ -24,6 +25,8 @@ TARGETS+=/etc/pki/ca-trust/source/anchors/dodroot.pem
 
 all: $(TARGETS)
 
+clean:
+	-rm -rf $(TARGETS) git libp11 engine_pkcs11 opensc curl-$(CURL_VERSION)
 
 
 # Environment setup
@@ -40,6 +43,7 @@ $(PREFIX)/ssl/openssl.cnf: openssl.cnf | $(PREFIX)/ssl
 
 /etc/profile.d/cygcac.sh: profile.d/cygcac.sh
 	cp profile.d/cygcac.sh $@
+	chmod 555 $@
 
 
 
@@ -51,9 +55,11 @@ $(PREFIX)/libexec/git-core/completion:
 $(PREFIX)/libexec/git-core/completion/%: git/contrib/completion/% | $(PREFIX)/libexec/git-core/completion
 	cp $< $@
 
-$(PREFIX)/libexec/git-core/git-credential-wincred.exe: | git/Makefile
-	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno' install
+$(PREFIX)/libexec/git-core/git-credential-wincred.exe: git/contrib/credential/wincred/git-credential-wincred.exe
+	cp $? $@
 
+git/contrib/credential/wincred/git-credential-wincred.exe: | git/Makefile
+	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno'
 
 $(PREFIX)/bin/git: git/git.exe
 	cd git; make install
@@ -62,7 +68,7 @@ git/git.exe: | git/Makefile
 	cd git; make -j$(CORES)
 
 git/Makefile: | git/.patched git/configure
-	cd git; ./configure LDFLAGS=$(LDFLAGS)
+	cd git; ./configure LDFLAGS='$(LDFLAGS)'
 
 git/configure: | git/.patched $(PREFIX)/lib/libcurl.a
 	cd git; autoconf
