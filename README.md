@@ -1,3 +1,8 @@
+NOTE! You might need to run the command "dos2unix" on every file before running the build script
+	find . | xargs dos2unix
+if dos2unix does not exists, then install it
+	apt-cyg install dos2unix
+
 # CYGCAC
 
 A script to help use smartcards with git (and other tools) on Windows under Cygwin.

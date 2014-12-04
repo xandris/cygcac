@@ -78,8 +78,11 @@ git/.patched: | git git-ssl-engines.patch
 	touch git/.patched
 
 git:
-	git clone --branch v$(GIT_VERSION) --depth 1 https://github.com/git/git.git git
-
+	git init $@
+	cd $@; git config core.autocrlf false
+	cd $@; git remote add origin https://github.com/git/git.git
+	cd $@; git fetch origin tags/v$(GIT_VERSION):tags/v$(GIT_VERSION) --depth 1
+	cd $@; git checkout v$(GIT_VERSION)
 
 
 
@@ -98,7 +101,11 @@ libp11/configure libp11/config.sub: | libp11
 	cd libp11; ./bootstrap
 
 libp11:
-	git clone https://github.com/OpenSC/libp11.git libp11
+	git init $@
+	cd $@; git config core.autocrlf false
+	cd $@; git remote add origin https://github.com/OpenSC/libp11.git
+	cd $@; git fetch
+	cd $@; git checkout master
 
 
 # engine_pkcs11 compile/install
@@ -113,7 +120,11 @@ engine_pkcs11/configure engine_pkcs11/config.sub: | engine_pkcs11
 	cd engine_pkcs11; ./bootstrap
 
 engine_pkcs11:
-	git clone https://github.com/OpenSC/engine_pkcs11.git engine_pkcs11
+	git init $@
+	cd $@; git config core.autocrlf false
+	cd $@; git remote add origin https://github.com/OpenSC/engine_pkcs11.git
+	cd $@; git fetch
+	cd $@; git checkout master
 
 
 # OpenSC compile/install
@@ -131,7 +142,11 @@ opensc/configure opensc/config.sub: | opensc
 	cd opensc; ./bootstrap
 
 opensc:
-	git clone https://github.com/OpenSC/OpenSC.git opensc
+	git init $@
+	cd $@; git config core.autocrlf false
+	cd $@; git remote add origin https://github.com/OpenSC/OpenSC.git
+	cd $@; git fetch
+	cd $@; git checkout master
 
 
 # Curl compile/install
