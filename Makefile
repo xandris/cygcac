@@ -59,7 +59,7 @@ $(PREFIX)/libexec/git-core/git-credential-wincred.exe: git/contrib/credential/wi
 	cp $? $@
 
 git/contrib/credential/wincred/git-credential-wincred.exe: | git/Makefile
-	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno'
+	make -C git/contrib/credential/wincred CFLAGS='$(CFLAGS) -D_fileno=fileno -D_O_BINARY=O_BINARY'
 
 $(PREFIX)/bin/git: git/git.exe
 	cd git; make install
