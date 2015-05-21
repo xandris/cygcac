@@ -1,5 +1,5 @@
 if ! [ -x /usr/local/bin/apt-cyg ]; then
-    curl 'https://apt-cyg.googlecode.com/svn/trunk/apt-cyg' > /usr/local/bin/apt-cyg
+    curl 'https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg' > /usr/local/bin/apt-cyg
     chmod +x /usr/local/bin/apt-cyg
 fi
 
