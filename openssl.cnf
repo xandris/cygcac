@@ -24,10 +24,10 @@ dynamic = dynamic_engine
 
 [dynamic_engine]
 
-SO_PATH=/usr/local/lib/engines/engine_pkcs11.so
+SO_PATH=/usr/local/lib/pkcs11.dll
 LIST_ADD=2
 LOAD=EMPTY
-MODULE_PATH=/usr/local/lib/pkcs11/opensc-pkcs11.so
+MODULE_PATH=/usr/local/lib/opensc-pkcs11.dll
 init=1
 
 # To use this configuration file with the "-extfile" option of the
@@ -121,7 +121,7 @@ emailAddress		= optional
 
 ####################################################################
 [ req ]
-default_bits		= 1024
+default_bits		= 2048
 default_keyfile 	= privkey.pem
 distinguished_name	= req_distinguished_name
 attributes		= req_attributes

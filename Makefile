@@ -7,7 +7,7 @@ CFLAGS=-O2 -march=native
 PREFIX=/usr/local
 
 TARGETS+=$(PREFIX)/lib/libp11.la
-TARGETS+=$(PREFIX)/lib/engines/engine_pkcs11.la
+#TARGETS+=$(PREFIX)/lib/engines/engine_pkcs11.la
 TARGETS+=$(PREFIX)/lib/libopensc.la
 TARGETS+=$(PREFIX)/lib/libcurl.a
 TARGETS+=$(PREFIX)/bin/curl
@@ -19,14 +19,14 @@ TARGETS+=$(PREFIX)/libexec/git-core/completion/git-completion.tcsh
 TARGETS+=$(PREFIX)/libexec/git-core/completion/git-completion.zsh
 TARGETS+=$(PREFIX)/libexec/git-core/completion/git-prompt.sh
 TARGETS+=/etc/profile.d/cygcac.sh
-TARGETS+=/etc/pki/ca-trust/source/anchors/dodroot.pem
+TARGETS+=/etc/pki/ca-trust/source/anchors/DoD_Root_CA_2__0x05__DoD_Root_CA_2.cer
 
 
 
 all: $(TARGETS)
 
 clean:
-	-rm -rf $(TARGETS) git libp11 engine_pkcs11 opensc curl-$(CURL_VERSION)
+	-rm -rf $(TARGETS) git libp11 opensc curl-$(CURL_VERSION)
 
 
 # Environment setup
@@ -34,8 +34,10 @@ clean:
 /etc/pki/ca-trust/source/anchors $(PREFIX)/ssl:
 	mkdir $@
 
-/etc/pki/ca-trust/source/anchors/dodroot.pem: | /etc/pki/ca-trust/source/anchors 
-	curl http://dodpki.c3pki.chamb.disa.mil/rel3_dodroot_2048.p7b | openssl pkcs7 -inform DER -out $@ -print_certs
+#/etc/pki/ca-trust/source/anchors/dodroot.pem: | /etc/pki/ca-trust/source/anchors 
+#	curl http://dodpki.c3pki.chamb.disa.mil/rel3_dodroot_2048.p7b | openssl pkcs7 -inform DER -out $@ -print_certs
+ 
+	cp DoD_Root_CA_2__0x05__DoD_Root_CA_2.cer /etc/pki/ca-trust/source/anchors/
 	update-ca-trust
 
 $(PREFIX)/ssl/openssl.cnf: openssl.cnf | $(PREFIX)/ssl
@@ -92,7 +94,7 @@ $(PREFIX)/lib/libp11.la: libp11/build/Makefile
 	cd libp11/build; make -j$(CORES) && make install
 
 libp11/build/Makefile: | libp11/build libp11/configure libp11/config.sub
-	cd libp11/build; ../configure
+	cd libp11/build; ../configure --with-enginesdir=/usr/local/lib
 
 libp11/build: | libp11
 	mkdir libp11/build 
@@ -110,21 +112,21 @@ libp11:
 
 # engine_pkcs11 compile/install
 
-$(PREFIX)/lib/engines/engine_pkcs11.la: engine_pkcs11/Makefile
-	cd engine_pkcs11; make -j$(CORES) && make install
+#$(PREFIX)/lib/engines/engine_pkcs11.la: engine_pkcs11/Makefile
+#	cd engine_pkcs11; make -j$(CORES) && make install
 
-engine_pkcs11/Makefile: | engine_pkcs11/configure engine_pkcs11/config.sub
-	cd engine_pkcs11; ./configure
+#engine_pkcs11/Makefile: | engine_pkcs11/configure engine_pkcs11/config.sub
+#	cd engine_pkcs11; ./configure
 
-engine_pkcs11/configure engine_pkcs11/config.sub: | engine_pkcs11
-	cd engine_pkcs11; ./bootstrap
+#engine_pkcs11/configure engine_pkcs11/config.sub: | engine_pkcs11
+#	cd engine_pkcs11; ./bootstrap
 
-engine_pkcs11:
-	git init $@
-	cd $@; git config core.autocrlf false
-	cd $@; git remote add origin https://github.com/OpenSC/engine_pkcs11.git
-	cd $@; git fetch
-	cd $@; git checkout master
+#engine_pkcs11:
+#	git init $@
+#	cd $@; git config core.autocrlf false
+#	cd $@; git remote add origin https://github.com/OpenSC/engine_pkcs11.git
+#	cd $@; git fetch
+#	cd $@; git checkout master
 
 
 # OpenSC compile/install
@@ -169,4 +171,4 @@ curl-$(CURL_VERSION): | curl-$(CURL_VERSION).tar.bz2
 	tar xjf curl-$(CURL_VERSION).tar.bz2
 
 curl-$(CURL_VERSION).tar.bz2:
-	curl -O http://curl.haxx.se/download/curl-$(CURL_VERSION).tar.bz2
+	wget http://curl.haxx.se/download/curl-$(CURL_VERSION).tar.bz2
