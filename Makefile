@@ -7,7 +7,6 @@ CFLAGS=-O2 -march=native
 PREFIX=/usr/local
 
 TARGETS+=$(PREFIX)/lib/libp11.la
-#TARGETS+=$(PREFIX)/lib/engines/engine_pkcs11.la
 TARGETS+=$(PREFIX)/lib/libopensc.la
 TARGETS+=$(PREFIX)/lib/libcurl.a
 TARGETS+=$(PREFIX)/bin/curl
@@ -34,9 +33,6 @@ clean:
 /etc/pki/ca-trust/source/anchors $(PREFIX)/ssl:
 	mkdir $@
 
-#/etc/pki/ca-trust/source/anchors/dodroot.pem: | /etc/pki/ca-trust/source/anchors 
-#	curl http://dodpki.c3pki.chamb.disa.mil/rel3_dodroot_2048.p7b | openssl pkcs7 -inform DER -out $@ -print_certs
- 
 	cp DoD_Root_CA_2__0x05__DoD_Root_CA_2.cer /etc/pki/ca-trust/source/anchors/
 	update-ca-trust
 
@@ -108,25 +104,6 @@ libp11:
 	cd $@; git remote add origin https://github.com/OpenSC/libp11.git
 	cd $@; git fetch
 	cd $@; git checkout master
-
-
-# engine_pkcs11 compile/install
-
-#$(PREFIX)/lib/engines/engine_pkcs11.la: engine_pkcs11/Makefile
-#	cd engine_pkcs11; make -j$(CORES) && make install
-
-#engine_pkcs11/Makefile: | engine_pkcs11/configure engine_pkcs11/config.sub
-#	cd engine_pkcs11; ./configure
-
-#engine_pkcs11/configure engine_pkcs11/config.sub: | engine_pkcs11
-#	cd engine_pkcs11; ./bootstrap
-
-#engine_pkcs11:
-#	git init $@
-#	cd $@; git config core.autocrlf false
-#	cd $@; git remote add origin https://github.com/OpenSC/engine_pkcs11.git
-#	cd $@; git fetch
-#	cd $@; git checkout master
 
 
 # OpenSC compile/install
